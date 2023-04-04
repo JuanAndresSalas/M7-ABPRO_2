@@ -1,4 +1,4 @@
-import { estudiantesRegistrados } from "./funciones.js"
+import { estudiantesRegistrados, nuevoEstudiante, consultaEstudiante, editarEstudiante, eliminarEstudiante } from "./funciones.js"
 
 
 const datos = process.argv.splice(2)
@@ -6,7 +6,6 @@ const datos = process.argv.splice(2)
 const accion = datos[0]
 
 const argumentos = datos.splice(1)
-
 
 
 
@@ -19,15 +18,18 @@ let consulta = {
 
 switch (accion) {
     case "nuevo":
-        if (datos.length == 4) {
+        if (argumentos.length == 4) {
             try{
-                parseInt(datos[3])
-                nuevoEstudiante(datos)
+                consulta.name = "nuevo"
+                consulta.text = "insert into  estudiante(nombre,rut,curso,nivel) values($1,$2,$3,$4) RETURNING *;"
+                parseInt(argumentos[3])
+                consulta.values = argumentos
+                nuevoEstudiante(consulta)
             }catch(error){
                 console.log(error)
             }
         }else{
-            console.log(`Cantidad erronea de parámetros\nParámetros necesarios: 4\nParámetros ingresados: ${datos.length}`)
+            console.log(`Cantidad erronea de parámetros\nParámetros necesarios: 4\nParámetros ingresados: ${argumentos.length}`)
         }
         break;
     case "registrados":
@@ -37,47 +39,55 @@ switch (accion) {
             try{
                 estudiantesRegistrados(consulta)
             }catch(error){
-                console.log(error.code)
+                console.log(error.messege)
             } 
         }else{
-            console.log(console.log(`Cantidad erronea de parámetros\nParámetros necesarios: 0\nParámetros ingresados: ${datos.length}`))
+            console.log(console.log(`Cantidad erronea de parámetros\nParámetros necesarios: 0\nParámetros ingresados: ${argumentos.length}`))
         }
         break; 
     case "consultar":
-        if(datos.length == 1){
+        if(argumentos.length == 1){
             try{
-                
-                estudiante(datos)
+                consulta.name = "consultar-estudiante"
+                consulta.text= `select * from estudiante where rut like $1`
+                consulta.values = argumentos
+                consultaEstudiante(consulta)
                 
             }catch(error){
                 console.log(error)
             } 
         }else{
-            console.log(console.log(`Cantidad erronea de parámetros\nParámetros necesarios: 1\nParámetros ingresados: ${datos.length}`))
+            console.log(console.log(`Cantidad erronea de parámetros\nParámetros necesarios: 1\nParámetros ingresados: ${argumentos.length}`))
         }
         break;
     case "actualizar":
-        if(datos.length == 4){
+        if(argumentos.length == 4){
             try{
-                parseInt(datos[3])
-                editarEstudiante(datos)
+                parseInt(argumentos[3])
+                consulta.name = "actualizar"
+                consulta.text = "UPDATE estudiante SET curso = $3, nivel = $4 WHERE rut like $2 or nombre like $1 returning *;"
+                consulta.values = argumentos
+                editarEstudiante(consulta)
                 
             }catch(error){
                 console.log(error)
             } 
         }else{
-            console.log(console.log(`Cantidad erronea de parámetros\nParámetros necesarios: 1\nParámetros ingresados: ${datos.length}`))
+            console.log(console.log(`Cantidad erronea de parámetros\nParámetros necesarios: 1\nParámetros ingresados: ${argumentos.length}`))
         }
         break;
     case "eliminar":
-        if(datos.length == 1){
+        if(argumentos.length == 1){
             try{
-                eliminarEstudiante(datos)
+                consulta.name = "eliminar"
+                consulta.text = `DELETE FROM estudiante WHERE rut like $1 RETURNING *;`
+                consulta.values = argumentos
+                eliminarEstudiante(consulta)
             }catch(error){
                 console.log(error)
             } 
         }else{
-            console.log(console.log(`Cantidad erronea de parámetros\nParámetros necesarios: 1\nParámetros ingresados: ${datos.length}`))
+            console.log(console.log(`Cantidad erronea de parámetros\nParámetros necesarios: 1\nParámetros ingresados: ${argumentos.length}`))
         }
         break;
     default:
